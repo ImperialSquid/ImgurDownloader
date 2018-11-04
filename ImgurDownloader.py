@@ -6,18 +6,27 @@ from ImgurExceptions import ImgurURLException
 
 class ImgurDownloader:
     def __init__(self, url, albumName=None, albumKeyInName = False, imageKeyInName = False, ):
-        if self.testURL(self, url):
-            self.url = url
+        if self.testURL(url):
+            self.rawURL = url
             self.albumName = albumName
             self.albumKeyInName = albumKeyInName
             self.imageKeyInName = imageKeyInName
+            self.imageIDs = []
+            self.getImageURLs()
         else:
             raise ImgurURLException("URL not recognised")
 
     def testURL(self, url):
         return re.match("(https?)\:\/\/(www\.)?(?:m\.)?imgur\.com/(a|gallery)/([a-zA-Z0-9]+)(#[0-9]+)?", url)
 
-    def download(self):
-        albumKey = re.match("(https?)\:\/\/(www\.)?(?:m\.)?imgur\.com/(a|gallery)/([a-zA-Z0-9]+)(#[0-9]+)?", self.url).group(4)
+    def getImageURLs(self):
+        albumKey = re.match("(https?)\:\/\/(www\.)?(?:m\.)?imgur\.com/(a|gallery)/([a-zA-Z0-9]+)(#[0-9]+)?", self.rawURL).group(4)
         fullURL = "http://imgur.com/a/"+albumKey+"/layout/blog"
-        print(fullURL)
+
+        source = req.get(fullURL).content
+        soup = BS(source, "lxml")
+        self.imageIDs = re.findall('.*?{"hash":"([a-zA-Z0-9]+)".*?"ext":"(\.[a-zA-Z0-9]+)".*?', soup.prettify())
+
+    def printImageURLs(self):
+        for image in self.imageIDs:
+            print(image[0]+image[1])
