@@ -27,6 +27,13 @@ class ImgurDownloader:
         soup = BS(source, "lxml")
         self.imageIDs = re.findall('.*?{"hash":"([a-zA-Z0-9]+)".*?"ext":"(\.[a-zA-Z0-9]+)".*?', soup.prettify())
 
+    def iterImageURLs(self):
+        for image in tuple(self.imageIDs):
+            yield "http://i.imgur.com/"+image[0]+image[1]
+
     def printImageURLs(self):
-        for image in self.imageIDs:
-            print(image[0]+image[1])
+        for image in self.iterImageURLs():
+            print(image)
+
+    def saveImages(self):
+        pass
