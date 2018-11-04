@@ -7,20 +7,21 @@ from ImgurExceptions import ImgurURLException, ImgurConnectionException
 class ImgurDownloader:
     def __init__(self, url, albumName=None, albumKeyInName = False, imageKeyInName = False, overWrite = True):
         if self.testURL(url):
-            self.rawURL = url
-            self.albumName = albumName
-            self.albumKey = None
-            self.albumKeyInName = albumKeyInName
-            self.imageKeyInName = imageKeyInName
-            self.imageIDs = []
-            self.getImageURLs()
+            self.rawURL = url #Raw url
+            self.albumName = albumName #Given name, if none given post title used
+            self.albumKey = None #Album ID
+            self.albumKeyInName = albumKeyInName #Use album key in directory name
+            self.imageKeyInName = imageKeyInName #Use image key in name
+            self.overWrite = overWrite #Over write directories and files?
+            self.imageIDs = [] #List of image keys and their file types
+            self.fetchImageURLs()
         else:
             raise ImgurURLException("URL not recognised")
 
     def testURL(self, url):
         return re.match("(https?)\:\/\/(www\.)?(?:m\.)?imgur\.com/(a|gallery)/([a-zA-Z0-9]+)(#[0-9]+)?", url)
 
-    def getImageURLs(self):
+    def fetchImageURLs(self):
         self.albumKey = re.match("(https?)\:\/\/(www\.)?(?:m\.)?imgur\.com/(a|gallery)/([a-zA-Z0-9]+)(#[0-9]+)?", self.rawURL).group(4)
         fullURL = "http://imgur.com/a/"+self.albumKey+"/layout/blog"
 
@@ -51,12 +52,11 @@ class ImgurDownloader:
         if not os.path.isdir(self.albumName):
             os.mkdir(self.albumName)
 
-        counter = 0
-        for image in self.imageIDs:
+        #Save images
+        for index, image in enumerate(self.imageIDs):
             # Creates a string for the images position and pads with zeros
-            name = str(counter+1).zfill(math.ceil(math.log(len(self.imageIDs) + 1, 10)))
+            name = str(index+1).zfill(math.ceil(math.log(len(self.imageIDs) + 1, 10)))
             if self.imageKeyInName:
                 name += " - "
-                name += self.imageIDs[counter][0]
+                name += self.imageIDs[index][0]
             print(name)
-            counter+=1
